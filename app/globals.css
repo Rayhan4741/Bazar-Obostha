@@ -1,3 +1,33 @@
 @import "tailwindcss";
 @import "@heroui/styles";
 @plugin "daisyui";
+
+body {
+  background: #f3f7f4;
+  color: #14231a
+}
+
+@keyframes ticker {
+  from {
+    transform: translateX(0)
+  }
+
+  to {
+    transform: translateX(-50%)
+  }
+}
+
+.ticker {
+  animation: ticker 40s linear infinite;
+  width: max-content
+}
+
+.ticker:hover {
+  animation-play-state: paused
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .ticker {
+    animation: none
+  }
+}
