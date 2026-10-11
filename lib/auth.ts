@@ -2,7 +2,6 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient } from "mongodb";
 
-// hot reload / serverless-এ বারবার নতুন connection খোলা ঠেকাতে একটা client reuse করা হয়
 const g = globalThis as unknown as { _mongo?: MongoClient };
 const client = g._mongo ?? new MongoClient(process.env.MONGODB_URI as string);
 if (process.env.NODE_ENV !== "production") g._mongo = client;
