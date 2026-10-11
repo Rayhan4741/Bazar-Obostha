@@ -3,7 +3,7 @@ import Link from "next/link";
 import useGuard from "@/components/useGuard";
 export default function Profile() {
   const { user, ready } = useGuard();
-  if (!ready)
+  if (!ready || !user)
     return <div className="skeleton h-48 max-w-xl mx-auto rounded-xl" />;
   return (
     <div className="max-w-xl mx-auto">

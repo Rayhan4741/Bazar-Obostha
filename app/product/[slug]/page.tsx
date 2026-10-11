@@ -3,6 +3,15 @@ import { use } from "react";
 import { useApi, bn, unitBn } from "@/lib/utils";
 import { Badge, NotFoundBox } from "@/components/ProductCard";
 import useGuard from "@/components/useGuard";
+function Stat({ l, v }: { l: string; v: number }) {
+  return (
+    <div className="border border-green-100 rounded-lg p-3">
+      <p className="text-xs text-gray-500">{l}</p>
+      <b className="text-green-700 text-lg">{bn(v)} টাকা</b>
+    </div>
+  );
+}
+
 export default function Product({
   params,
 }: {
@@ -19,12 +28,6 @@ export default function Product({
     max = Math.max(...m.map((x) => x.max));
   const avg = Math.round(
     m.reduce((s, x) => s + (x.min + x.max) / 2, 0) / (m.length || 1),
-  );
-  const Stat = ({ l, v }: { l: string; v: number }) => (
-    <div className="border border-green-100 rounded-lg p-3">
-      <p className="text-xs text-gray-500">{l}</p>
-      <b className="text-green-700 text-lg">{bn(v)} টাকা</b>
-    </div>
   );
   return (
     <div className="bg-white rounded-xl p-5 space-y-6">

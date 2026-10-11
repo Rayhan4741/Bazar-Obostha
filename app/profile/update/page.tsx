@@ -7,7 +7,7 @@ import { authClient } from "@/lib/auth-client";
 export default function Update() {
   const { user, ready } = useGuard();
   const router = useRouter();
-  if (!ready)
+  if (!ready || !user)
     return <div className="skeleton h-48 max-w-xl mx-auto rounded-xl" />;
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

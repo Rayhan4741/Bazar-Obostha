@@ -4,26 +4,36 @@ import { usePathname, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useApi, todayBn, type Category } from "@/lib/utils";
 import { authClient, useSession } from "@/lib/auth-client";
+
 export default function Navbar() {
-  const path = usePathname(),
-    router = useRouter();
+  const path = usePathname();
+  const router = useRouter();
   const { data: cats } = useApi<Category>("/categories");
   const { data: session, isPending } = useSession();
   const user = session?.user;
+
+
+  const close = () => (document.activeElement as HTMLElement | null)?.blur();
+
   const link = (href: string, label: string, active: boolean) => (
     <Link
       key={href}
       href={href}
-      className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap ${active ? "bg-green-700 text-white" : "hover:bg-green-50"}`}
+      className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap ${
+        active ? "bg-green-700 text-white" : "hover:bg-green-50"
+      }`}
     >
       {label}
     </Link>
   );
+
   const signOut = async () => {
+    close();
     await authClient.signOut();
     toast.success("সাইন আউট হয়েছে");
     router.push("/");
   };
+
   return (
     <header className="bg-white border-b border-green-100">
       <div className="max-w-6xl mx-auto px-4 pt-3 flex items-center justify-between gap-3">
@@ -33,9 +43,12 @@ export default function Navbar() {
           </span>
           <span>
             <b className="block leading-tight">বাজার দর</b>
-            <small className="text-[11px] text-gray-500">{todayBn()}</small>
+            <small className="block min-h-4 text-[11px] text-gray-500" suppressHydrationWarning>
+              {todayBn()}
+            </small>
           </span>
         </Link>
+
         <div className="flex items-center gap-2">
           {isPending ? (
             <div className="skeleton h-8 w-28" />
@@ -44,14 +57,16 @@ export default function Navbar() {
               <div
                 tabIndex={0}
                 role="button"
+                aria-label="প্রোফাইল মেনু"
                 className="flex items-center gap-2 cursor-pointer"
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={
                     user.image ||
                     `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(user.name)}`
                   }
-                  alt=""
+                  alt={user.name}
                   className="w-8 h-8 rounded-full"
                 />
                 <span className="text-sm hidden sm:block">{user.name}</span>
@@ -65,7 +80,9 @@ export default function Navbar() {
                   {user.email}
                 </li>
                 <li>
-                  <Link href="/profile">আমার প্রোফাইল</Link>
+                  <Link href="/profile" onClick={close}>
+                    আমার প্রোফাইল
+                  </Link>
                 </li>
                 <li>
                   <button onClick={signOut} className="text-red-600">
@@ -89,15 +106,23 @@ export default function Navbar() {
           )}
         </div>
       </div>
+
       <nav className="max-w-6xl mx-auto px-4 py-2 flex gap-1 overflow-x-auto">
         {link("/", "🏠 হোম", path === "/")}
-        {(cats || []).map((c) =>
-          link(
-            `/category/${c.slug}`,
-            `${c.icon} ${c.nameBn}`,
-            path === `/category/${c.slug}`,
-          ),
-        )}
+        {cats
+          ? cats.map((c) =>
+              link(
+                `/category/${c.slug}`,
+                `${c.icon} ${c.nameBn}`,
+                path === `/category/${c.slug}`,
+              ),
+            )
+          : Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="skeleton h-7 w-20 rounded-full shrink-0"
+              />
+            ))}
       </nav>
     </header>
   );

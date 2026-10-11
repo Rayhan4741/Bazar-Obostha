@@ -1,24 +1,22 @@
 "use client";
+import { useState } from "react";
 import { useApi, type Product } from "@/lib/utils";
 import { Grid, GridSkeleton } from "@/components/ProductCard";
-export default function Home() {
-  const { data, loading } = useApi("/products");
-  const top = (dir: string) =>
-    (data || [])
-      .filter((p) => p.change?.dir === dir)
-      .sort((a, b) => (b.change?.pct ?? 0) - (a.change?.pct ?? 0))
-      .slice(0, 6);
-  const Sec = ({
-    title,
-    sub,
-    id,
-    items,
-  }: {
-    title: string;
-    sub?: string;
-    id?: string;
-    items: Product[];
-  }) => (
+
+function Sec({
+  title,
+  sub,
+  id,
+  items,
+  loading,
+}: {
+  title: string;
+  sub?: string;
+  id?: string;
+  items: Product[];
+  loading: boolean;
+}) {
+  return (
     <section id={id} className="mt-8 scroll-mt-4">
       <h2 className="text-lg font-bold">{title}</h2>
       {sub && <p className="text-sm text-gray-500">{sub}</p>}
@@ -27,6 +25,43 @@ export default function Home() {
       </div>
     </section>
   );
+}
+
+function HeroImage() {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <div
+        className="text-center text-[8rem] md:text-[10rem] leading-none select-none"
+        aria-hidden
+      >
+        🧺
+      </div>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/hero.png"
+      alt="তাজা সবজি ও ফলের ঝুড়ি"
+      className="w-full max-w-sm mx-auto h-auto"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+export default function Home() {
+  const { data, loading, error } = useApi("/products");
+  const products = data ?? [];
+
+  const top = (dir: string) =>
+    products
+      .filter((p) => p.change?.dir === dir)
+      .sort(
+        (a, b) => Math.abs(b.change?.pct ?? 0) - Math.abs(a.change?.pct ?? 0),
+      )
+      .slice(0, 6);
+
   return (
     <>
       <section className="grid md:grid-cols-2 items-center gap-6 py-6">
@@ -45,21 +80,26 @@ export default function Home() {
             সব দাম দেখুন
           </a>
         </div>
-        <div
-          className="text-center text-[8rem] md:text-[10rem] leading-none select-none"
-          aria-hidden
-        >
-          🧺
-        </div>
+        <HeroImage />
       </section>
-      <Sec title="▲ আজ দাম বেড়েছে" items={top("up")} />
-      <Sec title="▼ আজ দাম কমেছে" items={top("down")} />
-      <Sec
-        id="সব-পণ্য"
-        title="সব পণ্য"
-        sub="সকল পণ্যের আজকের দাম ও পরিবর্তন"
-        items={data || []}
-      />
+
+      {error ? (
+        <p className="text-center text-red-600 py-10">
+          ডেটা লোড করা যায়নি। ইন্টারনেট সংযোগ দেখে পেজটি রিলোড করুন।
+        </p>
+      ) : (
+        <>
+          <Sec title="▲ আজ দাম বেড়েছে" items={top("up")} loading={loading} />
+          <Sec title="▼ আজ দাম কমেছে" items={top("down")} loading={loading} />
+          <Sec
+            id="সব-পণ্য"
+            title="সব পণ্য"
+            sub="সকল পণ্যের আজকের দাম ও পরিবর্তন"
+            items={products}
+            loading={loading}
+          />
+        </>
+      )}
     </>
   );
 }
